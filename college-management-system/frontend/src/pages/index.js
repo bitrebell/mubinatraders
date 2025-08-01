@@ -1,0 +1,16 @@
+export { RegisterPage } from './Auth/placeholders';
+export { VerifyEmailPage } from './Auth/placeholders';
+export { ForgotPasswordPage } from './Auth/placeholders';
+export { ResetPasswordPage } from './Auth/placeholders';
+export { DashboardPage } from './Auth/placeholders';
+export { ProfilePage } from './Auth/placeholders';
+export { EventsPage } from './Auth/placeholders';
+export { EventDetailPage } from './Auth/placeholders';
+export { CreateEventPage } from './Auth/placeholders';
+export { NotesPage } from './Auth/placeholders';
+export { NoteDetailPage } from './Auth/placeholders';
+export { CreateNotePage } from './Auth/placeholders';
+export { CoursesPage } from './Auth/placeholders';
+export { CourseDetailPage } from './Auth/placeholders';
+export { AdminPage } from './Auth/placeholders';
+export { NotFoundPage } from './Auth/placeholders';
