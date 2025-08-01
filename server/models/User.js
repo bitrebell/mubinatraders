@@ -1,91 +1,77 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const sequelize = require('../config/database');
 
-const userSchema = new mongoose.Schema({
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   name: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   email: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    lowercase: true,
-    trim: true
+    validate: {
+      isEmail: true
+    }
   },
   password: {
-    type: String,
-    required: true,
-    minlength: 6
+    type: DataTypes.STRING,
+    allowNull: false
   },
   role: {
-    type: String,
-    enum: ['student', 'teacher', 'admin'],
-    default: 'student'
+    type: DataTypes.ENUM('student', 'teacher', 'admin'),
+    defaultValue: 'student'
   },
   department: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   semester: {
-    type: Number,
-    min: 1,
-    max: 8
+    type: DataTypes.INTEGER,
+    validate: {
+      min: 1,
+      max: 8
+    }
   },
   isVerified: {
-    type: Boolean,
-    default: false
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   },
   avatar: {
-    type: String,
-    default: ''
+    type: DataTypes.STRING,
+    defaultValue: ''
   },
   notifications: {
-    email: {
-      type: Boolean,
-      default: true
-    },
-    newNotes: {
-      type: Boolean,
-      default: true
-    },
-    newQuestions: {
-      type: Boolean,
-      default: true
+    type: DataTypes.JSON,
+    defaultValue: {
+      email: true,
+      newNotes: true,
+      newQuestions: true
     }
   },
   lastLogin: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
   }
-}, {
-  timestamps: true
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
+User.beforeSave(async (user) => {
+  if (user.changed('password')) {
     const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
+    user.password = await bcrypt.hash(user.password, salt);
   }
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword) {
+User.prototype.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Remove password from JSON output
-userSchema.methods.toJSON = function() {
-  const user = this.toObject();
-  delete user.password;
-  return user;
-};
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

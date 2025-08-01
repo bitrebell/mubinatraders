@@ -1,125 +1,133 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const questionPaperSchema = new mongoose.Schema({
+const QuestionPaper = sequelize.define('QuestionPaper', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   title: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [3, 200]
+    }
   },
   subject: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   department: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   semester: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 8
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 8
+    }
   },
   examType: {
-    type: String,
-    enum: ['midterm', 'final', 'quiz', 'assignment', 'practical'],
-    required: true
+    type: DataTypes.ENUM('midterm', 'final', 'quiz', 'assignment', 'practical'),
+    allowNull: false
   },
   year: {
-    type: Number,
-    required: true,
-    min: 2000,
-    max: new Date().getFullYear() + 1
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 2000,
+      max: new Date().getFullYear() + 1
+    }
   },
   month: {
-    type: String,
-    enum: ['January', 'February', 'March', 'April', 'May', 'June', 
-           'July', 'August', 'September', 'October', 'November', 'December']
+    type: DataTypes.STRING
   },
   duration: {
-    type: String,
-    trim: true
+    type: DataTypes.STRING
   },
   maxMarks: {
-    type: Number,
-    min: 0
+    type: DataTypes.INTEGER,
+    validate: {
+      min: 0
+    }
   },
   fileUrl: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   fileName: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   fileSize: {
-    type: Number,
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   fileType: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   uploadedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   },
   isApproved: {
-    type: Boolean,
-    default: false
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   },
   approvedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   },
   approvedAt: {
-    type: Date
+    type: DataTypes.DATE
   },
   downloads: {
-    type: Number,
-    default: 0
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   difficulty: {
-    type: String,
-    enum: ['easy', 'medium', 'hard'],
-    default: 'medium'
+    type: DataTypes.ENUM('easy', 'medium', 'hard'),
+    defaultValue: 'medium'
   },
-  tags: [{
-    type: String,
-    trim: true
-  }],
+  tags: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   syllabus: {
-    type: String,
-    trim: true
+    type: DataTypes.TEXT
   },
-  solutions: [{
-    fileUrl: String,
-    fileName: String,
-    uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
+  solutions: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   visibility: {
-    type: String,
-    enum: ['public', 'department', 'private'],
-    default: 'public'
+    type: DataTypes.ENUM('public', 'department', 'private'),
+    defaultValue: 'public'
   }
 }, {
-  timestamps: true
+  tableName: 'question_papers',
+  indexes: [
+    {
+      fields: ['department', 'semester', 'subject', 'year']
+    },
+    {
+      fields: ['isApproved']
+    },
+    {
+      fields: ['examType']
+    }
+  ]
 });
 
-// Index for better search performance
-questionPaperSchema.index({ title: 'text', subject: 'text', tags: 'text' });
-questionPaperSchema.index({ department: 1, semester: 1, subject: 1, year: -1 });
-questionPaperSchema.index({ uploadedBy: 1 });
-questionPaperSchema.index({ isApproved: 1 });
-questionPaperSchema.index({ examType: 1 });
-
-module.exports = mongoose.model('QuestionPaper', questionPaperSchema);
+module.exports = QuestionPaper;

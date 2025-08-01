@@ -1,102 +1,118 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const notesSchema = new mongoose.Schema({
+const Notes = sequelize.define('Notes', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  subject: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  department: {
-    type: String,
-    required: true
-  },
-  semester: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 8
-  },
-  unit: {
-    type: String,
-    trim: true
-  },
-  topic: {
-    type: String,
-    trim: true
-  },
-  fileUrl: {
-    type: String,
-    required: true
-  },
-  fileName: {
-    type: String,
-    required: true
-  },
-  fileSize: {
-    type: Number,
-    required: true
-  },
-  fileType: {
-    type: String,
-    required: true
-  },
-  uploadedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  isApproved: {
-    type: Boolean,
-    default: false
-  },
-  approvedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  approvedAt: {
-    type: Date
-  },
-  downloads: {
-    type: Number,
-    default: 0
-  },
-  rating: {
-    average: {
-      type: Number,
-      default: 0
-    },
-    count: {
-      type: Number,
-      default: 0
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [3, 200]
     }
   },
-  tags: [{
-    type: String,
-    trim: true
-  }],
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+    validate: {
+      len: [10, 1000]
+    }
+  },
+  subject: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  department: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  semester: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 8
+    }
+  },
+  unit: {
+    type: DataTypes.STRING
+  },
+  topic: {
+    type: DataTypes.STRING
+  },
+  fileUrl: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  fileName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  fileSize: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  fileType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  uploadedBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  isApproved: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  approvedBy: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  approvedAt: {
+    type: DataTypes.DATE
+  },
+  downloads: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  rating: {
+    type: DataTypes.JSON,
+    defaultValue: {
+      average: 0,
+      count: 0
+    }
+  },
+  tags: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   visibility: {
-    type: String,
-    enum: ['public', 'department', 'private'],
-    default: 'public'
+    type: DataTypes.ENUM('public', 'department', 'private'),
+    defaultValue: 'public'
   }
 }, {
-  timestamps: true
+  tableName: 'notes',
+  indexes: [
+    {
+      fields: ['department', 'semester', 'subject']
+    },
+    {
+      fields: ['isApproved']
+    },
+    {
+      fields: ['uploadedBy']
+    }
+  ]
 });
 
-// Index for better search performance
-notesSchema.index({ title: 'text', description: 'text', subject: 'text', tags: 'text' });
-notesSchema.index({ department: 1, semester: 1, subject: 1 });
-notesSchema.index({ uploadedBy: 1 });
-notesSchema.index({ isApproved: 1 });
-
-module.exports = mongoose.model('Notes', notesSchema);
+module.exports = Notes;
