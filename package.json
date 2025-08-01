@@ -1,0 +1,22 @@
+{
+  "name": "college-notes-manager",
+  "version": "1.0.0",
+  "description": "A comprehensive college notes and previous year questions management system",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "start": "cd server && npm start"
+  },
+  "keywords": ["college", "notes", "education", "question-papers", "management"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
